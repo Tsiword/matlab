@@ -11,8 +11,7 @@ classdef Energysystem < handle
         
         management; % Energy management strategy: 1-SC_first, 2-Ps_arallel, 3-Improved, 4-Rule-based
         Ps_a; %The average power of sensor
-        k; % Energy management Ps_arameters
-        P4;
+        P4; % Energy management Ps_arameters
         P5;
         
         DC_Eff_Sensor = 0.9; % Efficiency of DC/DC for charge
@@ -37,7 +36,6 @@ classdef Energysystem < handle
             obj.v_harvester = v_harvester;
             obj.management = management;
             obj.Ps_a = Ps_a;
-            obj.k = k;
             if management>=4
                 obj.P4 = [Ps_a*k(1), k(2)*SC.Vm, Ps_a*k(3)];
                 if management == 5
