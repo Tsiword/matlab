@@ -22,14 +22,14 @@ classdef SolarHarvester < handle
                 obj.b = b; %The regressed parameters
                 obj.c = c; %The regressed parameters
                 obj.d = d; %The regressed parameters
-                obj.Area = A; % Relative area of solar cell [m2]
+                obj.Area = A; % Relative area of solar cells
             end
         end
         
         function computepower(obj,env1,env2)
             if nargin == 2
                 G = env1; % Global irradition [W/m2]
-                Pm = obj.a*G^2+obj.b*G+obj.c;
+                Pm = max(0,obj.a*G^2+obj.b*G+obj.c);
             elseif nargin == 3
                 G = env1; % Global irradition [W/m2]
                 T = env2; % Ambiant temperature [¡æ]

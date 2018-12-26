@@ -37,6 +37,15 @@ for j=1:fileNums
         end
     end
 end
-dQloss1 = (Qd1(1)-Qd1)/Qd1(1);
-dQloss2 = (Qd2(1)-Qd2)/Qd2(1);
-
+Qloss1 = (Qd1(1)-Qd1)/Qd1(1);
+Qloss2 = (Qd2(1)-Qd2)/Qd2(1);
+Ah1 = cumsum(Ah1);
+Ah2 = cumsum(Ah2);
+x1 = log(Ah1(2:end-1));
+y1 = log(Qloss1(2:end));
+x2 = log(Ah2(2:end-1));
+y2 = log(Qloss2(2:end));
+p1 = polyfit(x1,y1,1);
+p2 = polyfit(x2,y2,1);
+figure,plot(x1,y1,'o',x1,polyval(p1,x1))
+hold on,plot(x2,y2,'*',x2,polyval(p2,x2))

@@ -14,9 +14,9 @@ classdef SuperCapacitor_a < handle
         Msc = 1;
         
         % ----- Initial state parameters ----
-        Voc = 0; % Open circut voltage of SC
-        Soc = 0;
-        state = 0; % 0 - out of charge; 1 - normal; 2 - full of charge
+        Voc = 4; % Open circut voltage of SC
+        Soc = 0.8;
+        state = 1; % 0 - out of charge; 1 - normal; 2 - full of charge
     end
     
     methods
@@ -37,7 +37,7 @@ classdef SuperCapacitor_a < handle
                 disp('The SC is out of charge!');
             elseif Psys<0 && obj.state==2
                 disp('The SC is full of charge!');
-            else
+            elseif Psys~=0
                 Vocn = sqrt(obj.Voc^2-2*Psys*dt/obj.C); % Estimated voltage after charge/discharge
                 Q1 = obj.C*abs(Vocn-obj.Voc); % Estimated electric quantity change after charge/discharge
                 Er = Q1^2*obj.Rr/dt;

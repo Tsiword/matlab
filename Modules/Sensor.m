@@ -5,33 +5,34 @@ classdef Sensor < handle
         Ts; % Period of the sensor[s]
         te; % Time interval of emission[s]
         Ps; % Power of sleeping mode [mW]
-        Pe; % Power of emission mode [mW]
-        %         Pa; % Power of active mode [mW]
-        
+        Pa; % Power of active mode [mW]
+        Ph; % Power of high workload mode [mW]
         P; % Real power of sensor [W]
     end
     
     methods
-        %         function obj = Sensor(Ts, te, Ps, Pe, Pa)
-        function obj = Sensor(Ts, te, Ps, Pe)
+        function obj = Sensor(Ts, te, Ps, Pa, Ph)
             %Sensor 构造此类的实例
             %为Sensor对象赋予属性值
             obj.Ts = Ts;
             obj.te = te;
             obj.Ps = Ps;
-            obj.Pe = Pe;
-            %             obj.Pa = Pa;
+            obj.Pa = Pa;
+            obj.Ph = Ph;
         end
         
         function computepower(obj, event, Sys_t)
             %computepower 获取Sensor对象的功率要求
             sensor_t = rem(Sys_t,obj.Ts);
-            if (sensor_t>=obj.Ts/2 && sensor_t<obj.Ts/2+obj.te) || event==1
-                obj.P = obj.Pe;% Emission mode
+            if event==0
+                if (sensor_t>=obj.Ts/2 && sensor_t<obj.Ts/2+obj.te)
+                    obj.P = obj.Pa;% active mode
+                else
+                    obj.P = obj.Ps;% sleeping mode
+                end
             else
-                obj.P = obj.Ps;% sleeping mode
+                obj.P = obj.Ph;
             end
-            %             obj.P = obj.P+obj.Pa*event;
             obj.P = obj.P/1000;
         end
         
