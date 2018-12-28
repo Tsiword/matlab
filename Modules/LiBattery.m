@@ -37,8 +37,10 @@ classdef LiBattery < handle
             % dt为充放电仿真时间步长(s)
             if Pdemand>0 && obj.state==0
                 %                 disp('The battery is out of charge!');
+                obj.I = 0;
             elseif Pdemand<0 && obj.state==2
                 %                 disp('The battery is full of charge!');
+                obj.I = 0;
             elseif Pdemand~=0 && obj.state~=-1
                 % 1. Solve the battery model
                 if Pdemand>0
