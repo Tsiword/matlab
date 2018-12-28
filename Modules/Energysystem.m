@@ -149,7 +149,7 @@ classdef Energysystem < handle
                         if obj.supercapacitor.state~=2
                             P_SC = P_SC+Pdemand;
                         else
-                            if obj.s_harvester.P>2*obj.Ps_a
+                            if Pdemand<-5*obj.Ps_a
                                 Pdemand = min((1-obj.k(4)*obj.k(5)-(1-obj.k(5))*obj.battery.Soc)/(1-obj.k(4)),1)*Pdemand;
                             end
                             P_Bat = P_Bat+Pdemand;

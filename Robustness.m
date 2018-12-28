@@ -11,9 +11,11 @@ Vsc = 5;
 Nsc = 2;
 % 电池参数
 Vbat = 3.7;
+% Q = 25/1000;
 % 太阳能电池参数
 Psolar_a = 0.000269654227794441;
 DC_Eff_pv = 0.9;
+% S_s = 20;
 % 系统参数
 dt = 0.2; % Sample interval [s]
 P5 = [2 0.98 2];% 能量管理策略参数
@@ -21,23 +23,23 @@ P6 = [-0.2 0.6];
 k = [P5 P6];
 % 环境参数
 load('E:\qnj\EnergySystem\matlab\Datas\En&event\En.mat');
+% 事件参数
+load('E:\qnj\EnergySystem\matlab\Datas\En&event\event_10_1.mat');
 % 初始化
-Qloss_end = zeros(7,5);
+Qloss_end = zeros(12,5);
 i = 0;
-for lambda = [1 2 5 10 20 50 100]
-% for Ph = [10 20 50 100 120 150 200]    
-    % 事件参数
-    load(['E:\qnj\EnergySystem\matlab\Datas\En&event\event_' num2str(lambda) '_1.mat']);
+% for lambda = [0.1 0.2 0.5 1 2 5 10 20 50 100]
+% for Ph = [10 20 50 100 120 150 200]
+for C_sc = [0.02 0.05 0.1 0.2 0.5 1 2 5 10 20 50 100]
     i = i+1;
     % 负载参数
-%     lambda = 10;
+    lambda = 10;
     Ph = 200;
     Ps_a = (((Ps*(Ts-Te)+Pa*Te))/Ts*(1-lambda*miu/3600)+Ph*lambda*miu/3600)/1000/DC_Eff_ch;
     disp(['The average power of sensor is:' num2str(Ps_a) 'W']);
     % 超电参数
-    Msc = Ph/1000*miu*2/0.9*2/(0.75*Vsc^2)/C;
-    Msc = ceil(Msc);
-    disp(['The SC capacity is:' num2str(Msc*C) 'F']);
+    Msc = C_sc/C;
+%     disp(['The SC capacity is:' num2str(Msc*C) 'F']);
     % 电池参数
     Q = Ps_a*24/DC_Eff_ch/Vbat;% 锂电池容量
     disp(['The battery capacity is:' num2str(Q*1000) 'mAh']);
@@ -64,6 +66,9 @@ for lambda = [1 2 5 10 20 50 100]
         Qloss_end(i,m) = energysystem.battery.Qloss-0.01;
     end
 end
-plot([1 2 5 10 20 50 100],Qloss_end');
-xlabel('Event frequency {/lambda}'),ylabel('Baterry Capacity Loss');
+plot(log10([0.02 0.05 0.1 0.2 0.5 1 2 5 10 20 50 100]),Qloss_end','o:');
+% plot(log10([10 20 50 100 120 150 200]),Qloss_end');
+% xlabel('Event Frequency lg(Lambda)'),ylabel('Baterry Capacity Loss');
+% xlabel('High Load Power lg(Ph)'),ylabel('Baterry Capacity Loss');
+xlabel('Capacity of SC (lg(F))'),ylabel('Baterry Capacity Loss');
 legend('Without Supercapacitor','SC First','Voltage Controlled','Improved Parallel','Rule Based', 'Location','NorthEast');
