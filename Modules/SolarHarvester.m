@@ -4,7 +4,7 @@ classdef SolarHarvester < handle
     properties
         % Harvester parameters
         Area; % Area of solar cell [cm2]
-        a = 2e-7; %The regressed parameters 
+        a = -2e-7; %The regressed parameters 
         b = 0.0029; %The regressed parameters 
         c = -0.0071; %The regressed parameters 
         d = 0; %The regressed parameters 
