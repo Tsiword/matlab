@@ -13,9 +13,10 @@ disp(['The average power of sensor is:' num2str(Ps_a) 'W']);
 C = 0.1225;
 Vsc = 5;
 Nsc = 2;
-Msc = Ph/1000*miu*2/0.9*2/(0.75*Vsc^2)/C;
-Msc = ceil(Msc);
-disp(['The SC capacity is:' num2str(Msc*C) 'F']);
+Msc0 = Ph/1000*miu*2/0.9*2/(0.75*Vsc^2)/C;
+Msc = 2;
+Cr = Msc/Msc0;
+disp(['The SC capacity is:' num2str(Cr) '*' num2str(Msc0*C) 'F']);
 % 电池参数
 Vbat = 3.7;
 Q = Ps_a*24/DC_Eff_ch/Vbat;% 锂电池容量
@@ -24,20 +25,21 @@ disp(['The battery capacity is:' num2str(Q*1000) 'mAh']);
 % 太阳能电池参数
 Psolar_a = 0.000269654227794441;
 DC_Eff_pv = 0.9;
-S_s = Ps_a/DC_Eff_ch/DC_Eff_pv/Psolar_a;% 太阳能电池面积
-% S_s = ceil(S_s/10)*10;
+suntime = 1/10;
+S_s = Ps_a/DC_Eff_ch/DC_Eff_pv/Psolar_a/suntime;% 太阳能电池面积
 disp(['The area of solor panel is:' num2str(S_s) 'cm^2']);
 % 系统参数
 dt = 0.2; % Sample interval [s]
 day = 1;
-P5 = [2 0.98 2];% 能量管理策略参数
-P6 = [-0.2 0.6];
+b = 0.8955;
+P5 = [2*Ps_a k2_cr(b,Cr)*Vsc 2.5*Ps_a];% 能量管理策略参数
+P6 = [-0.1 0.1];
 k = [P5 P6];
 % 事件参数
 % event = event_generate(dt,lambda,miu);
 load(['E:\qnj\EnergySystem\matlab\Datas\En&event\event_' num2str(lambda) '_1.mat']);
 % 环境参数
-load('E:\qnj\EnergySystem\matlab\Datas\En&event\En.mat');
+load('E:\qnj\EnergySystem\matlab\Datas\En&event\En_shaded.mat');
 % 初始化
 Qloss = zeros(day*24*60,5);
 Sys_P = zeros(day*24*3600/dt,5,5);
@@ -65,13 +67,13 @@ for m = 1:5
             Qloss(jj,m) = energysystem.battery.Qloss-0.01;
         end
     end
-    figure(1),hold on,plot((1:ii)*dt/3600/24,SC_V(1:ii,m));
-    figure(2),hold on,plot((1:ii)*dt/3600/24,Bat_Soc(1:ii,m));
-    figure(3),hold on,plot((1:ii)*dt/3600/24,Bat_I(1:ii,m));
+    figure(1),hold on,plot((1:ii)*dt/3600,SC_V(1:ii,m));
+    figure(2),hold on,plot((1:ii)*dt/3600,Bat_Soc(1:ii,m));
+    figure(3),hold on,plot((1:ii)*dt/3600,Bat_I(1:ii,m));
 end
-save('E:\qnj\EnergySystem\matlab\Datas\System\SC_V.mat','SC_V');
-save('E:\qnj\EnergySystem\matlab\Datas\System\Bat_Soc.mat','Bat_Soc');
-save('E:\qnj\EnergySystem\matlab\Datas\System\Bat_I.mat','Bat_I');
+% save('E:\qnj\EnergySystem\matlab\Datas\System\SC_V.mat','SC_V');
+% save('E:\qnj\EnergySystem\matlab\Datas\System\Bat_Soc.mat','Bat_Soc');
+% save('E:\qnj\EnergySystem\matlab\Datas\System\Bat_I.mat','Bat_I');
 figure(1),xlabel('Time(h)'),ylabel('Supercapacitor voltage(V)');
 legend('Without Supercapacitor','SC First','Voltage Controlled','Improved Parallel','Rule Based', 'Location','SouthEast');
 figure(2),xlabel('Time(h)'),ylabel('Baterry SOC');

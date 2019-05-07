@@ -34,7 +34,7 @@ P6 = [0 0.2];
 k = [P5 P6];
 % 环境参数
 load('E:\qnj\EnergySystem\matlab\Datas\En&event\event_10_1.mat');
-load('E:\qnj\EnergySystem\matlab\Datas\En&event\En.mat');
+load('E:\qnj\EnergySystem\matlab\Datas\En&event\En_shaded.mat');
 % 初始化
 Qloss = zeros(day*24*60,6);
 Soc = zeros(day*24*60,6);
@@ -53,14 +53,9 @@ for m = 5:6
         for hour = 0:23
             for min = 0:59
                 jj = jj+1;
-                if rand(1)<suntime
-                    sun = 1;
-                else
-                    sun = 0;
-                end
                 for ss = 0:(60/dt-1)
                     ii = ii+1;
-                    energysystem.update(event(ii),sun*En(jj));% 更新系统状态
+                    energysystem.update(event(ii),En(jj));% 更新系统状态
                 end
                 j = j+1;
                 Qloss(j,m) = energysystem.battery.Qloss-0.01;

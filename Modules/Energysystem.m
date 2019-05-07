@@ -10,7 +10,8 @@ classdef Energysystem < handle
         
         management; % Energy management strategy: 1-SC_first, 2-Ps_arallel, 3-Improved, 4-Rule-based
         Ps_a; %The average power of sensor
-        k; % Energy management Ps_arameters
+        k; % Energy management Parameters
+        k_adaptive; % Adaptive Energy management Parameters
         
         DC_Eff_Sensor = 0.9; % Efficiency of DC/DC for charge
         DC_Eff_Solar = 0.9; % Efficiency of DC/DC for solar cell
@@ -32,12 +33,13 @@ classdef Energysystem < handle
             obj.s_harvester = s_harvester;
             obj.management = management;
             obj.Ps_a = Ps_a;
-            obj.k = [k(1)*Ps_a,k(2)*SC.Vm,k(3)*Ps_a,k(4),k(5)];
+            obj.k = k;
+            obj.k_adaptive = [k(1)*Ps_a,k(2)*SC.Vm,k(3)*Ps_a,k(4),k(5)];
         end
         
         function P = update(obj, event, env)
             % update the energy system at the time Sys_t
-            if obj.state==1
+            if obj.state>=0
                 obj.Sys_t = obj.Sys_t+obj.dt;
                 obj.sensor.computepower(event, obj.Sys_t);
                 obj.s_harvester.computepower(env);
@@ -114,25 +116,6 @@ classdef Energysystem < handle
                     end
                     
                 case 5 % Strategy: Rule-based strategy
-                    if obj.s_harvester.P<obj.k(1) && obj.supercapacitor.Voc<obj.k(2)
-                        P_Bat = obj.k(3);
-                        P_SC = -P_Bat;
-                    end
-                    if Pdemand>0
-                        if obj.supercapacitor.state ~= 0
-                            P_SC = P_SC+Pdemand;
-                        else
-                            P_Bat = P_Bat+Pdemand;
-                        end
-                    else
-                        if obj.supercapacitor.state~=2
-                            P_SC = P_SC+Pdemand;
-                        else
-                            P_Bat = P_Bat+Pdemand;
-                        end
-                    end
-                    
-                case 6 % Strategy: Improved Rule-based strategy
                     if obj.s_harvester.P<obj.k(1)
                         if obj.supercapacitor.Voc<obj.k(2)
                             P_Bat = obj.k(3);
@@ -151,6 +134,30 @@ classdef Energysystem < handle
                         else
                             if Pdemand<-5*obj.Ps_a
                                 Pdemand = min((1-obj.k(4)*obj.k(5)-(1-obj.k(5))*obj.battery.Soc)/(1-obj.k(4)),1)*Pdemand;
+                            end
+                            P_Bat = P_Bat+Pdemand;
+                        end
+                    end
+                    
+                case 6 % Strategy: Adaptive Rule-based strategy
+                    if obj.s_harvester.P<obj.k_adaptive(1)
+                        if obj.supercapacitor.Voc<obj.k_adaptive(2)
+                            P_Bat = obj.k_adaptive(3);
+                            P_SC = -P_Bat;                            
+                        end
+                    end
+                    if Pdemand>0
+                        if obj.supercapacitor.state ~= 0
+                            P_SC = P_SC+Pdemand;
+                        else
+                            P_Bat = P_Bat+Pdemand;
+                        end
+                    else
+                        if obj.supercapacitor.state~=2
+                            P_SC = P_SC+Pdemand;
+                        else
+                            if Pdemand<-5*obj.Ps_a
+                                Pdemand = min((1-obj.k_adaptive(4)*obj.k_adaptive(5)-(1-obj.k_adaptive(5))*obj.battery.Soc)/(1-obj.k_adaptive(4)),1)*Pdemand;
                             end
                             P_Bat = P_Bat+Pdemand;
                         end
